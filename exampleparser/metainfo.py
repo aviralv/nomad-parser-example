@@ -22,6 +22,7 @@ import numpy as np
 from nomad.datamodel import EntryArchive
 from nomad.metainfo.metainfo import Datetime
 
+
 class DeviceSettings(MSection):
     device_name = Quantity(type=str)
     analysis_method = Quantity(type=str)
@@ -32,19 +33,23 @@ class DeviceSettings(MSection):
     workfunction = Quantity(type=str)
     channel_id = Quantity(type=str)
 
+
 class Sample(MSection):
     spectrum_region = Quantity(type=str, shape=[])
 
+
 class Experiment(MSection):
     method_type = Quantity(type=str)
+
 
 class Instrument(MSection):
     n_scans = Quantity(type=str)
     dwell_time = Quantity(type=str)
     excitation_energy = Quantity(type=str)
     source_label = Quantity(type=str)
-    
+
     section_device_settings = SubSection(sub_section=DeviceSettings, repeats=True)
+
 
 class AuthorGenerated(MSection):
     author_name = Quantity(type=str)
@@ -53,13 +58,16 @@ class AuthorGenerated(MSection):
     experiment_id = Quantity(type=str)
     timestamp = Quantity(type=str)
 
+
 class DataHeader(MSection):
     channel_id = Quantity(type=str)
     label = Quantity(type=str)
     unit = Quantity(type=str)
 
+
 class NumericalValues(MSection):
-    data_values = Quantity(type=np.dtype(np.float64), shape=['*'])
+    data_values = Quantity(type=np.dtype(np.float64), shape=['*', '*'])
+
 
 class Metadata(MSection):
     section_sample = SubSection(sub_section=Sample, repeats=True)
@@ -68,12 +76,15 @@ class Metadata(MSection):
     section_author_generated = SubSection(sub_section=AuthorGenerated, repeats=True)
     section_data_header = SubSection(sub_section=DataHeader, repeats=True)
 
+
 class Data(MSection):
     section_numerical_values = SubSection(sub_section=NumericalValues, repeats=True)
+
 
 class Measurement(MSection):
     section_metadata = SubSection(sub_section=Metadata, repeats=True)
     section_data = SubSection(sub_section=Data, repeats=True)
+
 
 class MyEntryArchive(EntryArchive):
     m_def = Section(extends_base_section=True)

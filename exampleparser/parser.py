@@ -46,96 +46,52 @@ class ExampleParser(FairdiParser):
         # Log a hello world, just to get us started. TODO remove from an actual parser.
         logger.info('Testing the World')
 
-        #Read the JSON file into a dictionary
+        # Read the JSON file into a dictionary
         with open(mainfile, 'rt') as f:
             file_data = json.load(f)
 
-        #Reading a measurement
-        measurement = archive.m_create(Measurement)
+        for measurement_data in file_data:
+            # Reading a measurement
+            measurement = archive.m_create(Measurement)
 
-        #Create the hierarchical structure
-        metadata = measurement.m_create(Metadata)
-        data = measurement.m_create(Data)
+            # Create the hierarchical structure
+            metadata = measurement.m_create(Metadata)
+            data = measurement.m_create(Data)
 
-        # Create the hierarchical structure inside metadata
-        sample = metadata.m_create(Sample)
-        experiment = metadata.m_create(Experiment)
-        instrument = metadata.m_create(Instrument)
-        data_header = metadata.m_create(DataHeader)
-        author_generated = metadata.m_create(AuthorGenerated)
+            # Create the hierarchical structure inside metadata
+            sample = metadata.m_create(Sample)
+            experiment = metadata.m_create(Experiment)
+            instrument = metadata.m_create(Instrument)
+            author_generated = metadata.m_create(AuthorGenerated)
 
-        #Load entries into each above hierarchical structure
-        #Sample
-        sample.spectrum_region = file_data[0]['metadata']['spectrum_region']
+            # Load entries into each above hierarchical structure
+            # Sample
+            sample.spectrum_region = measurement_data['metadata']['spectrum_region']
 
-        #Experiment
-        experiment.method_type = file_data[0]['metadata']['method_type']
+            # Experiment
+            experiment.method_type = measurement_data['metadata']['method_type']
 
-        #Instrument
-        instrument.n_scans = file_data[0]['metadata']['n_scans']
-        instrument.dwell_time = file_data[0]['metadata']['dwell_time']
-        instrument.excitation_energy = file_data[0]['metadata']['excitation_energy']
+            # Instrument
+            instrument.n_scans = measurement_data['metadata']['n_scans']
+            instrument.dwell_time = measurement_data['metadata']['dwell_time']
+            instrument.excitation_energy = measurement_data['metadata']['excitation_energy']
 
-        if file_data[0]['metadata']['source_label']:
-            instrument.source_label = file_data[0]['metadata']['source_label']
-        
-        author_generated.author_name = file_data[0]['metadata']['author']
-        author_generated.group_name = file_data[0]['metadata']['group_name']
-        author_generated.sample_id = file_data[0]['metadata']['sample']
-        author_generated.experiment_id = file_data[0]['metadata']['experiment_id']
-        author_generated.timestamp = file_data[0]['metadata']['timestamp']
+            if measurement_data['metadata']['source_label']:
+                instrument.source_label = measurement_data['metadata']['source_label']
 
-        #Data Header
-        for dlabel in file_data[0]['metadata']['data_labels']: 
-            data_header.channel_id = str(dlabel['channel_id'])
-            data_header.label = dlabel['label']
-            data_header.unit = dlabel['unit']
+            author_generated.author_name = measurement_data['metadata']['author']
+            author_generated.group_name = measurement_data['metadata']['group_name']
+            author_generated.sample_id = measurement_data['metadata']['sample']
+            author_generated.experiment_id = measurement_data['metadata']['experiment_id']
+            author_generated.timestamp = measurement_data['metadata']['timestamp']
 
-        #Reading columns
-        numerical_values = data.m_create(NumericalValues)
-        numerical_values.data = file_data[0]['data'][0]
-        
+            # Data Header
+            for label_data in measurement_data['metadata']['data_labels']:
+                data_header = metadata.m_create(DataHeader)
+                data_header.channel_id = str(label_data['channel_id'])
+                data_header.label = label_data['label']
+                data_header.unit = label_data['unit']
 
-
-        # for item in file_data:
-
-        #     measurement = archive.m_create(Measurement)
-        #     # measurement.timestamp = datetime.datetime.now()
-
-        #     metadata = measurement.m_create(Metadata)
-
-        #     sample = metadata.m_create(Sample)
-        #     sample.spectrum_region = item['metadata']['spectrum_region']
-
-        #     # experiment = metadata.m_create(Experiment)
-        #     # experiment.method_type = data[i]['metadata']['method_type']
-
-        #     # instrument = metadata.m_create(Instrument)
-        #     # instrument.n_scans = data[i]['metadata']['n_scans']
-        #     # instrument.dwell_time = data[i]['metadata']['dwell_time']
-        #     # instrument.excitation_energy = data[i]['metadata']['excitation_energy']
-            
-
-        #     # try:
-        #     #     instrument.source_label = data[i]['metadata']['source_label']
-        #     # except KeyError:
-        #     #     print("Couldn't find key")
-
-        #     # author_generated = metadata.m_create(AuthorGenerated)
-        #     # author_generated.author_name = data[i]['metadata']['author']
-        #     # author_generated.group_name = data[i]['metadata']['group_name']
-        #     # author_generated.sample_id = data[i]['metadata']['sample']
-        #     # author_generated.experiment_id = data[i]['metadata']['experiment_id']
-        #     # author_generated.timestamp = data[i]['metadata']['timestamp']
-
-        #     data_header = metadata.m_create(DataHeader)
-        #     for dlabel in item['metadata']['data_labels']: 
-        #         data_header.channel_id = str(dlabel['channel_id'])
-        #         data_header.label = dlabel['label']
-        #         data_header.unit = dlabel['unit']
-
-        #     # data = measurement.m_create(Data)
-
-        #     # numerical_values = data.m_create(NumericalValues)
-        #     # # numerical_values.data_values = data[0]['data'][0]
-        
+            # Reading columns
+            numerical_values = data.m_create(NumericalValues)
+            numerical_values.data_values = measurement_data['data']
